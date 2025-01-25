@@ -22,12 +22,13 @@ impl Renderer {
         Self {
             error,
             state: Piecall::new(projects),
-            body: ProjectList,
+            body: ProjectList::new(),
             exit: false,
         }
     }
 
     pub fn run(mut self, mut term: Terminal) -> Result<()> {
+        self.state.set_focus::<ProjectList>();
         term.draw(|fr|self.render(fr)).ok();
 
         loop {
@@ -56,6 +57,8 @@ impl Renderer {
             self.exit = true;
             return;
         }
+
+        self.body.handle_event(&self.state, event);
     }
 
     fn render(&self, frame: &mut Frame) {
