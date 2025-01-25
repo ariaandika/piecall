@@ -58,10 +58,10 @@ impl Renderer {
             return;
         }
 
-        self.body.handle_event(&self.state, event);
+        self.body.handle_event(event);
     }
 
-    fn render(&self, frame: &mut Frame) {
+    fn render(&mut self, frame: &mut Frame) {
         self.body.render(frame, &self.state);
     }
 }
