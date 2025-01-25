@@ -10,9 +10,9 @@ pub enum Error {
     Io(IoError),
 }
 
-impl<E> From<E> for Error where E: std::error::Error + 'static {
+impl<E> From<E> for Error where E: Into<Box<dyn std::error::Error>> + 'static {
     fn from(value: E) -> Self {
-        Self::Custom(Box::new(value))
+        Self::Custom(value.into())
     }
 }
 
