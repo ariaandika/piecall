@@ -1,18 +1,19 @@
-use crossterm::event::{self, Event, KeyCode, KeyEvent};
+use crossterm::event::{self, Event};
 use ratatui::Frame;
 
 use crate::{
-    error::{Result, StdError},
+    error::{BoxError, Result},
     project,
     ui::project_list::ProjectList,
     Piecall, Terminal,
 };
 
 pub struct Renderer {
+    // STATE
     state: Piecall,
-    error: Option<Box<StdError>>,
-    exit: bool,
+    error: Option<BoxError>,
 
+    // UI
     body: ProjectList,
 }
 
@@ -20,44 +21,34 @@ impl Renderer {
     pub fn setup() -> Self {
         let (projects, error) = project::io::list_project(std::env::args().skip(1));
         Self {
-            error,
             state: Piecall::new(projects),
             body: ProjectList::new(),
-            exit: false,
+            error,
         }
     }
 
     pub fn run(mut self, mut term: Terminal) -> Result<()> {
         self.state.set_focus::<ProjectList>();
-        term.draw(|fr|self.render(fr)).ok();
+        term.draw(|fr|self.render(fr))?;
 
         loop {
-            if self.exit || self.error.is_some() {
+            if self.state.is_exit() || self.error.is_some() {
                 break;
             }
 
             self.handle_event(event::read()?);
-            term.draw(|fr|self.render(fr)).ok();
+            term.draw(|fr|self.render(fr))?;
         };
 
-        match self.error {
-            None => Ok(()),
-            Some(err) => Err(crate::error::Error::Custom(err)),
+        if let Some(err) = self.error.take() {
+            Err(err)?;
         }
+
+        Ok(())
     }
 
     fn handle_event(&mut self, event: Event) {
-        if matches!(
-            event,
-            Event::Key(KeyEvent {
-                code: KeyCode::Esc,
-                ..
-            })
-        ) {
-            self.exit = true;
-            return;
-        }
-
+        self.state.handle_event(&event);
         self.body.handle_event(event);
     }
 
