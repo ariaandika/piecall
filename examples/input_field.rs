@@ -10,7 +10,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // NOTE: save state between loop
     let mut state = InputState::default();
 
-    loop {
+    let output = loop {
         term.draw(|fr| {
             let area = fr.area();
 
@@ -24,14 +24,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let event = event::read()?;
 
         if let Event::Key(KeyEvent { code: KeyCode::Esc, .. }) = &event {
-            break;
+            break String::new();
         }
 
         // NOTE: handle event if input field is focused for example
-        state.handle_event(&event);
-    }
+        let submit = state.handle_event(&event);
+
+        if submit {
+            break state.into_buffer();
+        }
+    };
 
     ratatui::restore();
+
+    if !output.is_empty() {
+        println!();
+        println!("Output: {output}");
+    }
 
     Ok(())
 }

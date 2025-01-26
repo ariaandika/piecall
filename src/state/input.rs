@@ -19,15 +19,20 @@ impl InputState {
         &self.buffer
     }
 
+    pub fn into_buffer(self) -> String {
+        self.buffer
+    }
+
     pub fn cursor(&self) -> CursorState {
         self.cursor
     }
 }
 
 impl InputState {
-    pub fn handle_event(&mut self, event: &Event) {
+    /// return true if submited
+    pub fn handle_event(&mut self, event: &Event) -> bool {
         let Event::Key(KeyEvent { code, modifiers, .. }) = event else {
-            return;
+            return false;
         };
 
         match (code,*modifiers) {
@@ -41,6 +46,7 @@ impl InputState {
                 self.cursor.next();
             },
 
+            (KeyCode::Enter,..) => return true,
             (KeyCode::Left,..) => self.cursor.prev(),
             (KeyCode::Right,..) => self.cursor.next(),
             (KeyCode::Home,..) => self.cursor.start(),
@@ -48,10 +54,10 @@ impl InputState {
 
             (KeyCode::Backspace,..) => {
                 let Some(idx) = self.cursor.checked_sub(1) else {
-                    return;
+                    return false;
                 };
                 let Some((idx,_)) = self.buffer.char_indices().nth(idx as usize) else {
-                    return;
+                    return false;
                 };
 
                 self.buffer.remove(idx);
@@ -63,13 +69,15 @@ impl InputState {
 
             (KeyCode::Delete,..) => {
                 let Some((idx,_)) = self.buffer.char_indices().nth(*self.cursor as usize) else {
-                    return;
+                    return false;
                 };
                 self.buffer.remove(idx);
                 self.cursor.set_len_str(&self.buffer);
             }
             _ => {}
         }
+
+        false
     }
 }
 
