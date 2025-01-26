@@ -1,2 +1,3 @@
-//! general state management widget
+//! general widget state management
 pub mod input;
+pub mod cursor;
