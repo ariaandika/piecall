@@ -3,6 +3,7 @@ pub mod piecall;
 pub mod renderer;
 pub mod ui;
 pub mod project;
+pub mod state;
 
 pub use piecall::Piecall;
 pub use renderer::Renderer;
