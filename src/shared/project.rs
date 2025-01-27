@@ -39,7 +39,7 @@ pub mod io {
 
     use super::*;
 
-    pub fn list_project(
+    pub fn list(
         paths: impl IntoIterator<Item = impl AsRef<Path>>,
     ) -> (Vec<Project>, Option<BoxError>) {
         let mut projects = vec![];

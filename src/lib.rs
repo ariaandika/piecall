@@ -1,12 +1,7 @@
+pub mod prompt;
+pub mod shared;
+pub mod project_list;
 pub mod error;
-pub mod piecall;
-pub mod renderer;
-pub mod ui;
-pub mod project;
-pub mod state;
-
-pub use piecall::Piecall;
-pub use renderer::Renderer;
 
 use std::io::Stdout;
 use ratatui::prelude::CrosstermBackend;
